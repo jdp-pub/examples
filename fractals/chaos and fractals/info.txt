@@ -1,0 +1,2 @@
+
+Code for the book "Chaos and Fractals" by Peitgen and Saupe
