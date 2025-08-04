@@ -1146,14 +1146,14 @@ def rn_spiral():
     goto(-100,100)
     pendown()
 
-
     n = 1
     while a > tol:
         circle(-a,90)
-        #a = a*k
-        #a = a0/n
-        #a = k**(n-1)*a0
-        a = (1/g)**(n-1)*a0
+        # some options for the scale a
+        #a = a*k #
+        #a = a0/n #
+        #a = k**(n-1)*a0 #
+        a = (1/g)**(n-1)*a0 # golden spiral
         
         n = n+1
         
@@ -1161,6 +1161,7 @@ def rn_spiral():
     done()
 
 def unit32(step):
+    # 32 curve base botif
      forward(step)
      left(90)
      forward(step)
@@ -1178,10 +1179,12 @@ def unit32(step):
 
 def build32(step,depth):
 
-    if(depth ==0):
+    if(depth ==0): # base modtif
         unit32(step)
         return
 
+    # each section of the compound object is built 
+    # by the base motif
     build32(step,depth-1)
     left(90)
      
@@ -1213,25 +1216,21 @@ def curve32():
     depth = 2
 
     build32(step,depth)
-
     done()
 
 
 def load_png(path):
-    
     # Load image and convert to grayscale (L mode = 8-bit pixels, black and white)
     img = Image.open(path).convert('L')
     matrix = np.array(img)
-
-    #print(matrix.shape)        # (height, width)
-    #print(matrix.dtype)
     return matrix
 
 
 def box_dim():
-
+    # loads the example file and approximates a box
+    # dimension, only works for the provided file
+    # unless pixel counting is generalized
     pix = load_png('wild_fractal.png')
-
 
     xl = pix.shape[0]
     yl = pix.shape[1]
@@ -1241,30 +1240,16 @@ def box_dim():
     N = []
     sl = []
 
-
     for sx in [[4,6],[8,12]]:
         boxes = 0
         bsx = xl/sx[0]
         bsy = yl/sx[1]
-        #print(bsx)
-        #print(bsy)
-        #stop
         for boxx in range(0,sx[0]):
             for boxy in range(0,sx[1]):
-                #print("boxy")
-                #print(1*boxx,int(bsx*boxx))
-
-
-                # indexing is not correct
                 for pxx in range(int(bsx*boxx),int(bsx*boxx+bsx)):
                     for pxy in range(int(bsy*boxy),int(bsy*boxy+bsy)):
-                        #print(pxx)
-                        #print(pxy)
-                        #print(f"last index: {int(bsy*boxy+bsy)}")
                         z = pix[pxx-1][pxy-1]
-                        #print()
                         if z < 0.1:
-                            #print(z)
                             found = True
                             break
                     if found:
@@ -1272,23 +1257,17 @@ def box_dim():
                 if found:
                     found = False
                     boxes = boxes + 1
-                    #print(pxx,pxy)
-                    #print(boxx,boxy)
-                    #stop
         N.append(np.log(boxes))
         sl.append(np.log(sx[1]))
 
-    print(np.exp(N))
-
     slope, intercept, r_value, p_value, std_err = linregress(sl, N)
-    print("Slope:", slope)
-
+    print("Slope:", slope) # approximate box dimension, slope of line on loglog scale
     plt.plot(sl,N)
     plt.show()
 
 def dcr(depth,s,coords):
     #devils staircase recursion
-
+    # builds object point by point
     if depth==0:
         return coords
 
@@ -1304,11 +1283,7 @@ def dcr(depth,s,coords):
     xl = x - sx/3
     xr = x + sx/3
 
-
     sn = [1/3**sp,1/2**sp,sp+1]
-    #print(depth)
-    #print(sp)
-    #print()
     left = dcr(depth-1,sn,[xl,yl])
     right = dcr(depth-1,sn,[xr,yr])
 
@@ -1323,21 +1298,60 @@ def devils_staircase():
     xl = []
     yl = []
 
-    #print(pts)
-    print(len(pts))
-
     for nx in range(len(pts)):
         if nx%2==0:
             xl.append(pts[nx])
         else:
             yl.append(pts[nx])
             
-    #print(xl)
-    #print(yl)
-
-    #sys.exit(0)
-    #plt.scatter(xl,yl,s=0.2)
     plt.plot(xl,yl,linewidth=0.5)
     plt.show()
+
+def buildds(stepx,stepy,depth):
+    # builds devils staircase by considering 
+    # the scenario where a person walks ahead 
+    # until they hit a pole, walk up the pole, 
+    # then walk across the top of the pole until 
+    # they hit another and so on until the 
+    # objest is built
+    if depth == 0:
+        # base motif
+        forward(stepx)
+        left(90)
+        forward(stepy)
+        right(90)
+        forward(stepx*2)
+        left(90)
+        forward(stepy)
+        right(90)
+        return
+
+    # fist segment
+    buildds(stepx/3,stepy/2,depth-1)
+
+    # connection
+    forward(stepx)
+
+    # second segment
+    buildds(stepx/3,stepy/2,depth-1)
+
+
+def devils_staircase_r():
+    # devils staircase with turtle
+
+    penup()
+    goto(-200,-200)
+    pendown()
+
+    stepx = 100
+    stepy = 100
+    depth = 5
+
+    buildds(stepx,stepy,depth)
+    done()
+
+
+
+
 
 

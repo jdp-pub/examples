@@ -44,6 +44,6 @@ def main():
     #core.curve32()
     #core.box_dim()
     #core.devils_staircase()
-
+    core.devils_staircase_r()
 if __name__ == "__main__":
     main()
